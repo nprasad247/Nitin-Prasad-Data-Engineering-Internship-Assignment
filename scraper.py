@@ -20,6 +20,7 @@ def generate_table(title, table_num):
 # Search a table for a specific query, returning the row of the table if the query is found, else 'None'.
 # Supports exact and inexact matches.
 def keyword_search(tab, query, exact=False):
+    
     def mask(column):
         m = [tab.iloc[i, column] == query for i in range(len(tab))] if exact else tab.iloc[:, column].str.contains(
             query)
@@ -86,6 +87,7 @@ table.replace('Clinton', 'Clinton Township', inplace = True)
 # Remove redundant columns
 del table['2016 Land Area (km)']
 del table['2016 Population Density (km)']
+
 # Cleanup for several values in the table, removing stray Unicode characters and reformatting numerical values
 for i, a in enumerate(table.iloc[:,6]):
     table.replace(table.iloc[:,5][i], unicodedata.normalize('NFKD', table.iloc[:,5][i]).replace('−','-'), inplace = True)

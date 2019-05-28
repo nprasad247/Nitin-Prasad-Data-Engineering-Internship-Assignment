@@ -57,6 +57,11 @@ def split_upper(s):
 
 
 def clean_mayors(s):
+    # Remove brackets and parentheses containing multiple characters
+    s = re.sub(r'\[[^\]]*\]', '', s)
+    s = re.sub(r'\(..+\)', '', s)
+    if ')' in s:
+        s = s[:s.index(')') + 1]
     # regex pattern to find lowercase next to uppercase
     splits = re.findall(r'[a-z][A-Z]', s)
     words = re.split(r'[a-z][A-Z]', s, maxsplit=1)
@@ -64,8 +69,8 @@ def clean_mayors(s):
         # regex pattern to find ')' next to uppercase letter
         splits = re.findall(r'\)[A-Z]', s)
         words = re.split(r'\)[A-Z]', s, maxsplit=1)
-    # LaToya is the sole exception to the rule
-    if not splits or 'LaToya' in s:
+    # Ignore the possible exceptions (i.e. 'LaToya', 'McDonald', 'DeAnza')
+    if not splits or 'LaToya' in s or 'Mc' in s or len(re.findall(r'De[A-Z]', s)) > 0:
         return s
     # Remove 'Mayor' from name
     return (words[0] + splits[0][0]).replace('Mayor', '')
@@ -148,7 +153,7 @@ for i in range(num):
     if mayor is 'None':
         mayors.append('N/A')
     else:
-        mayors.append(clean_mayors(re.sub(r'\[[^\]]*\]', '', mayor.iloc[0, 1])))
+        mayors.append(clean_mayors(mayor.iloc[0,1]))
 # New York county abnormality, clean up
 counties[0] = ", ".join(counties[0].split(')'))
 # Add the new columns to the table

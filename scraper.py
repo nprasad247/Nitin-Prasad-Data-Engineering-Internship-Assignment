@@ -57,26 +57,36 @@ def split_upper(s):
 
 
 def clean_mayors(s):
-    # Remove brackets and parentheses containing multiple characters
-    s = re.sub(r'\[[^\]]*\]', '', s)
-    s = re.sub(r'\(..+\)', '', s)
+    # Remove brackets and parentheses from string
+    s = re.sub(r'\[[^\]]*\]','', s)
     if ')' in s:
         s = s[:s.index(')') + 1]
-    # regex pattern to find lowercase next to uppercase
+    if ',' in s:
+        s = s[:s.index(',')]
+    s = re.sub(r'\(.+\)', '', s).replace('Mayor', '').replace('City council:', '')
+    if (s[0] == ' '):
+        s = s[1:]
+    # Regex pattern to find lowercase next to uppercase
     splits = re.findall(r'[a-z][A-Z]', s)
-    words = re.split(r'[a-z][A-Z]', s, maxsplit=1)
+    words = re.split(r'[a-z][A-Z]', s, maxsplit = 1)
     if not splits:
-        # regex pattern to find ')' next to uppercase letter
-        splits = re.findall(r'\)[A-Z]', s)
-        words = re.split(r'\)[A-Z]', s, maxsplit=1)
-    # Ignore the possible exceptions (i.e. 'LaToya', 'McDonald', 'DeAnza')
-    if not splits or 'LaToya' in s or 'Mc' in s or len(re.findall(r'De[A-Z]', s)) > 0:
         return s
-    # Remove 'Mayor' from name
-    return (words[0] + splits[0][0]).replace('Mayor', '')
+    # Retain the first name in the string, discarding everything else
+    s1 = (words[0] + splits[0][0]).split(' ')[:3]
+    for w in s1:
+        if '.' in w:
+            s1 = " ".join(s1)
+            break
+    else:
+        s1 = " ".join(s1[:2])
+    # Name may be badly formed due to edge cases ('LaToya', 'McDonald', 'DeAnza'). Revert to original string
+    if s1[-2:] in ['La', 'De', 'Mc']:
+        return s
+    return s1
 
 
 # Generate the initial table from the Wikipedia page
+print("Generating initial table...")
 table = generate_table('List_of_United_States_cities_by_population', 4).iloc[:num]
 
 # Clean up the column names
